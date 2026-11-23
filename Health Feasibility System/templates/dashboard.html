@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard | Health Feasibility System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --space-dark: #0B0E17;
+      --space-medium: #1A1F2E;
+      --space-light: #2A3042;
+      --accent-primary: #4A90E2;
+      --accent-secondary: #7B68EE;
+      --accent-glow: #00D4FF;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8C1E0;
+      --text-muted: #8E96B0;
+      --success: #3BCF8D;
+      --error: #FF5E7C;
+      --warning: #FFB347;
+      --gradient-1: linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%);
+      --gradient-2: linear-gradient(135deg, #00D4FF 0%, #4A90E2 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--space-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 30%, rgba(74, 144, 226, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(123, 104, 238, 0.15) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Stars effect - lighter for performance */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--duration) infinite ease-in-out;
+      opacity: var(--opacity);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--opacity); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(11, 14, 23, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand i {
+      font-size: 1.5rem;
+      color: var(--accent-glow);
+      -webkit-text-fill-color: initial;
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-bubble {
+      background: var(--gradient-1);
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-bubble::before {
+      content: '\f007';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logout-btn::before {
+      content: '\f2f5';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+      transform: translateY(-2px);
+    }
+
+    /* Dashboard Container */
+    .dashboard-wrap {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+
+    .panel h3 {
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Form Styles */
+    .form-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-field {
+      flex: 1;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem 1rem 0.9rem 2.5rem;
+      background: var(--space-light);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin: 2rem 0 1rem;
+    }
+
+    .btn-primary {
+      padding: 1rem 2rem;
+      background: var(--gradient-1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+      font-size: 1rem;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-ghost {
+      padding: 1rem 2rem;
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-ghost:hover {
+      background: var(--glass-bg);
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+
+    /* Result */
+    #result {
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 1rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Plot Buttons */
+    #plotBtns {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      justify-content: center;
+    }
+
+    #plotBtns button {
+      flex: 0 1 auto;
+      min-width: 200px;
+    }
+
+    /* Plots Area */
+    #plotsArea {
+      margin-top: 2rem;
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #plotsHeading {
+      text-align: center;
+      margin: 1.5rem 0 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    #plotsHeading::before {
+      content: '\f200';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: var(--accent-glow);
+      -webkit-text-fill-color: initial;
+    }
+
+    .plots {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .img-wrap {
+      background: var(--space-light);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      max-width: 100%;
+    }
+
+    .img-wrap:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(74, 144, 226, 0.2);
+    }
+
+    .img-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    /* Toast */
+    .toast-wrap {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 1001;
+    }
+
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      animation: slideIn 0.3s ease;
+      max-width: 350px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    .toast.success {
+      background: rgba(59, 207, 141, 0.2);
+      border-left: 4px solid var(--success);
+      color: var(--success);
+    }
+
+    .toast.error {
+      background: rgba(255, 94, 124, 0.2);
+      border-left: 4px solid var(--error);
+      color: var(--error);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 1rem;
+      }
+      
+      .brand span {
+        display: none;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      #plotBtns {
+        flex-direction: column;
+      }
+      
+      #plotBtns button {
+        width: 100%;
+      }
+      
+      .dashboard-wrap {
+        padding: 0 1rem;
+        margin: 1rem auto;
+      }
+      
+      .panel {
+        padding: 1.5rem;
+      }
+      
+      .panel h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Stars background - lighter for performance -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="brand">
+      <i class="fas fa-rocket"></i>
+      <span>Health Feasibility System</span>
+    </div>
+    <div class="nav-user">
+      <div class="user-bubble">
+        {{ user }}
+      </div>
+      <a class="logout-btn" href="/logout"></a>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-wrap">
+    <div class="panel">
+      <h1>
+        <i class="fas fa-brain" style="margin-right: 10px; -webkit-text-fill-color: initial; color: var(--accent-glow);"></i>
+        ML Health Feasibility Prediction
+      </h1>
+      <h3>
+        <i class="fas fa-heartbeat" style="margin-right: 10px; color: var(--error);"></i>
+        Health Parameters
+      </h3>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="hb">
+            <i class="fas fa-heart" style="margin-right: 5px; color: var(--error);"></i>
+            Heart Beat
+          </label>
+          <div class="input-wrapper">
+            <i class="fas fa-wave-square input-icon"></i>
+            <input id="hb" placeholder="e.g. 72">
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="bt">
+            <i class="fas fa-thermometer-half" style="margin-right: 5px; color: var(--warning);"></i>
+            Body Temperature
+          </label>
+          <div class="input-wrapper">
+            <i class="fas fa-temperature-high input-icon"></i>
+            <input id="bt" placeholder="e.g. 36.6">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="hum">
+            <i class="fas fa-tint" style="margin-right: 5px; color: var(--accent-glow);"></i>
+            Humidity
+          </label>
+          <div class="input-wrapper">
+            <i class="fas fa-water input-icon"></i>
+            <input id="hum" placeholder="e.g. 45">
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="rt">
+            <i class="fas fa-thermometer-empty" style="margin-right: 5px; color: var(--success);"></i>
+            Room Temperature
+          </label>
+          <div class="input-wrapper">
+            <i class="fas fa-home input-icon"></i>
+            <input id="rt" placeholder="e.g. 24">
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="predictBtn" class="btn-primary" onclick="predict()" disabled>
+          <i class="fas fa-robot"></i>
+          Predict
+        </button>
+        <button class="btn-ghost" onclick="predictArduino()">
+          <i class="fas fa-microchip"></i>
+          Measure from Arduino
+        </button>
+      </div>
+
+      <div id="result"></div>
+
+      <div id="plotBtns" style="display:none;">
+        <button class="btn-ghost" onclick="showMetrics()">
+          <i class="fas fa-chart-bar"></i>
+          Show Metrics
+        </button>
+        <button class="btn-ghost" onclick="showCM()">
+          <i class="fas fa-grid"></i>
+          Show Confusion Matrix
+        </button>
+      </div>
+
+      <div id="plotsArea">
+        <h4 id="plotsHeading" style="display:none;"></h4>
+        <div class="plots">
+          <div class="img-wrap" id="metricsWrap" style="display:none;">
+            <img id="metricsImg" alt="Model Performance Metrics">
+          </div>
+          <div class="img-wrap" id="cmWrap" style="display:none;">
+            <img id="cmImg" alt="Confusion Matrix">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-wrap" id="toasts"></div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    <div id="flash-data" data-messages='{{ messages | tojson | safe }}' style="display:none;"></div>
+    <script>
+      (function(){
+        const dataElement = document.getElementById('flash-data');
+        try{
+          window._flashed = JSON.parse(dataElement.dataset.messages || '[]');
+        }catch(e){ window._flashed = []; }
+      })();
+    </script>
+  {% endwith %}
+
+  <script>
+    // Generate stars - lighter for performance
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      // Only 30 stars for better performance
+      for (let i = 0; i < 30; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--opacity', Math.random() * 0.5 + 0.5);
+        star.style.setProperty('--duration', Math.random() * 2 + 1.5 + 's');
+        starsContainer.appendChild(star);
+      }
+    }
+    createStars();
+
+    // Toast helper
+    function showToast(message, type='success', timeout=4000){
+      const wrap = document.getElementById('toasts');
+      const el = document.createElement('div');
+      el.className = 'toast ' + (type==='error' ? 'error' : 'success');
+      el.innerHTML = `<i class="fas ${type==='error' ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="margin-right: 10px;"></i>${message}`;
+      wrap.appendChild(el);
+      setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),300) }, timeout);
+    }
+
+    // Show flashed messages
+    if(Array.isArray(window._flashed)){
+      window._flashed.forEach(([cat,msg])=> showToast(msg, cat==='error' ? 'error' : 'success'));
+    }
+
+    // DOM elements
+    const hb = document.getElementById("hb");
+    const bt = document.getElementById("bt");
+    const hum = document.getElementById("hum");
+    const rt = document.getElementById("rt");
+    const result = document.getElementById("result");
+    const predictBtn = document.getElementById("predictBtn");
+    const plotBtns = document.getElementById("plotBtns");
+    const metricsImg = document.getElementById("metricsImg");
+    const cmImg = document.getElementById("cmImg");
+    const metricsWrap = document.getElementById("metricsWrap");
+    const cmWrap = document.getElementById("cmWrap");
+    const plotsHeading = document.getElementById("plotsHeading");
+
+    // Validation
+    function valid(x){ return !isNaN(parseFloat(x)) && isFinite(x); }
+
+    function updatePredict(){
+      predictBtn.disabled = !(valid(hb.value) && valid(bt.value) && valid(hum.value) && valid(rt.value));
+    }
+
+    [hb, bt, hum, rt].forEach(i => i && i.addEventListener("input", updatePredict));
+
+    // Arduino measurement
+    function predictArduino(){
+      result.innerHTML = '<i class="fas fa-satellite-dish" style="margin-right: 10px;"></i>Measuring from Arduino...';
+      result.style.color = 'var(--text-secondary)';
+      
+      fetch("/arduino").then(r=>r.json()).then(d=>{
+        if(d.success){
+          hb.value = d.heart_beat;
+          bt.value = d.body_temp;
+          hum.value = d.humidity;
+          rt.value = d.atm_temp;
+          updatePredict();
+          result.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success); margin-right: 10px;"></i>Parameters measured successfully';
+          result.style.color = 'var(--success)';
+          showToast('Arduino values loaded', 'success');
+        } else {
+          result.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--warning); margin-right: 10px;"></i>Arduino data not received';
+          result.style.color = 'var(--warning)';
+          showToast('Arduino not reachable', 'error');
+        }
+      }).catch(()=>{ 
+        result.innerHTML = '<i class="fas fa-times-circle" style="color: var(--error); margin-right: 10px;"></i>Network error';
+        result.style.color = 'var(--error)';
+        showToast('Network error', 'error');
+      });
+    }
+
+    // Prediction
+    function predict(){
+      result.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>Analyzing health data...';
+      
+      fetch("/predict", {
+        method: "POST",
+        body: new URLSearchParams({ 
+          heart_beat: hb.value, 
+          body_temp: bt.value, 
+          humidity: hum.value, 
+          atm_temp: rt.value 
+        })
+      })
+      .then(r => r.json())
+      .then(d => {
+        if(d.success) {
+          const isFeasible = d.label === 'Feasible';
+          result.innerHTML = `
+            <i class="fas ${isFeasible ? 'fa-check-circle' : 'fa-exclamation-triangle'}" 
+               style="color: ${isFeasible ? 'var(--success)' : 'var(--warning)'}; margin-right: 10px;"></i>
+            ${d.label} / ${d.result || 'Normal'}
+          `;
+          result.style.color = isFeasible ? 'var(--success)' : 'var(--warning)';
+          showToast('Prediction ready', 'success');
+          plotBtns.style.display = "flex";
+        } else {
+          result.innerHTML = `<i class="fas fa-times-circle" style="color: var(--error); margin-right: 10px;"></i>${d.error || 'Prediction failed'}`;
+          result.style.color = 'var(--error)';
+          if(d.error) showToast(d.error, 'error');
+        }
+      }).catch(() => {
+        result.innerHTML = '<i class="fas fa-times-circle" style="color: var(--error); margin-right: 10px;"></i>Network error';
+        result.style.color = 'var(--error)';
+        showToast('Network error', 'error');
+      });
+    }
+
+    // Show Metrics
+    function showMetrics(){
+      metricsImg.src = '/static/plots/metrics.png?' + Date.now();
+      metricsImg.onload = () => {
+        metricsWrap.style.display = 'inline-block';
+        cmWrap.style.display = 'none';
+        plotsHeading.innerHTML = '<i class="fas fa-chart-bar" style="margin-right: 10px;"></i>Random Forest - Model Performance Metrics';
+        plotsHeading.style.display = 'block';
+        setTimeout(() => document.getElementById('plotsArea').scrollIntoView({behavior:'smooth', block:'center'}), 120);
+      };
+    }
+
+    // Show Confusion Matrix
+    function showCM(){
+      cmImg.src = '/static/plots/confusion_matrix.png?' + Date.now();
+      cmImg.onload = () => {
+        cmWrap.style.display = 'inline-block';
+        metricsWrap.style.display = 'none';
+        plotsHeading.innerHTML = '<i class="fas fa-grid" style="margin-right: 10px;"></i>Random Forest - Confusion Matrix';
+        plotsHeading.style.display = 'block';
+        setTimeout(() => document.getElementById('plotsArea').scrollIntoView({behavior:'smooth', block:'center'}), 120);
+      };
+    }
+
+    // Make functions globally available
+    window.predictArduino = predictArduino;
+    window.predict = predict;
+    window.showMetrics = showMetrics;
+    window.showCM = showCM;
+  </script>
+</body>
+</html>
